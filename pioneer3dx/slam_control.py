@@ -1,6 +1,6 @@
 # ROS libraries
 import rclpy
-from geometry_msgs.msg import PointStamped,  Point32
+from geometry_msgs.msg import PointStamped,  Point32, Twist
 from sensor_msgs.msg import LaserScan, PointCloud, Imu
 from nav_msgs.msg import Odometry
 # Python libraries
@@ -33,8 +33,7 @@ class SLAMController():
         self.__laserScan = LaserScan() 
         self.__pointCloud = PointCloud()
         self.__odom = Odometry() 
-        self.__leftVelocity = 1
-        self.__rightVelocity = 1
+        self.__targetTwist = Twist()
         self.__broadcast = RobotBroadcaster(self.__node)
         # Initialize sensors and motors
         self.motorInitialization()
@@ -44,7 +43,8 @@ class SLAMController():
         self.__imuPub = self.__node.create_publisher(Imu, '/pioneer3dx/sensor/imu', 10)
         self.__laserScanPub = self.__node.create_publisher(LaserScan, '/pioneer3dx/sensor/laser_scan', 10)
         self.__pointCloudPub = self.__node.create_publisher(PointCloud, '/pioneer3dx/sensor/lidar_point_cloud', 10)  
-        self.__odomPub = self.__node.create_publisher(Odometry, '/pioneer3dx/robot/odometry', 10)
+        self.__odomPub = self.__node.create_publisher(Odometry, '/pioneer3dx/wheel/odometry', 10)
+        self.__node.create_subscription(Twist, '/pioneer3dx/wheel/cmd_vel', self.velocityCallback, 10)
     def motorInitialization(self):
         #  Motor initialization
         self.__leftMotor.setPosition(float('inf'))
@@ -63,7 +63,9 @@ class SLAMController():
         # GPS initialization
         self.__gps.enable(self.__timeStep)
         # IMU initialization
-        self.__imu.enable(self.__timeStep)   
+        self.__imu.enable(self.__timeStep)
+    def velocityCallback(self, twist):
+        self.__targetTwist = twist   
     def getGPSData(self):
         gpsData = self.__gps.getValues()
         self.__gpsData.header.stamp = self.__node.get_clock().now().to_msg()
@@ -150,11 +152,17 @@ class SLAMController():
         self.__prevRightPosition = currRightPosition
     def step(self):
         rclpy.spin_once(self.__node, timeout_sec=0)
-        self.__leftMotor.setVelocity(self.__leftVelocity)
-        self.__rightMotor.setVelocity(self.__rightVelocity)
+        linear_vel = self.__targetTwist.linear.x
+        angular_vel = self.__targetTwist.angular.z
+
+        leftVelocity = (linear_vel - 0.5 * angular_vel *  self.wheel_base)/self.wheel_radius
+        rightVelocity = (linear_vel + 0.5 * angular_vel * self.wheel_base)/self.wheel_radius
+
+        self.__leftMotor.setVelocity(leftVelocity)
+        self.__rightMotor.setVelocity(rightVelocity)
         self.getImuData()
         self.getLidarLaserScan()
-        self.odometry()
+        # self.odometry()
         
     @staticmethod
     def quaternion_from_euler(ai, aj, ak):

@@ -8,6 +8,7 @@ data_files.append(('share/' + package_name + '/worlds', ['worlds/pioneer3dx_worl
 data_files.append(('share/' + package_name + '/resource', ['resource/pioneer3dx_webots.urdf']))
 data_files.append(('share/' + package_name + '/models', ['models/pioneer3dx.urdf']))
 data_files.append(('share/' + package_name + '/rviz', ['rviz/urdf_config.rviz']))
+data_files.append(('share/' + package_name + '/config', ['config/ekf.yaml']))
 data_files.append(('share/' + package_name, ['package.xml']))
 setup(
     name=package_name,

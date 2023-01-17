@@ -11,16 +11,17 @@ from webots_ros2_driver.webots_launcher import WebotsLauncher, Ros2SupervisorLau
 from webots_ros2_driver.utils import controller_url_prefix
 
 def generate_launch_description():
-    packager_dir = get_package_share_directory('pioneer3dx')
+    package_dir = get_package_share_directory('pioneer3dx')
 
-    robot_description = pathlib.Path(os.path.join(packager_dir,'resource', 'pioneer3dx_webots.urdf')).read_text()
+    robot_description = pathlib.Path(os.path.join(package_dir,'resource', 'pioneer3dx_webots.urdf')).read_text()
 
-    webots = WebotsLauncher(world = os.path.join(packager_dir, 'worlds', 'pioneer3dx_world.wbt'))
+    webots = WebotsLauncher(world = os.path.join(package_dir, 'worlds', 'pioneer3dx_world.wbt'))
 
     ros2_supervisor = Ros2SupervisorLauncher()
 
-    default_model_path = os.path.join(packager_dir, "models", "pioneer3dx.urdf")
-    default_rviz_config_path = os.path.join(packager_dir, "rviz", "urdf_config.rviz")
+    default_model_path = os.path.join(package_dir, "models", "pioneer3dx.urdf")
+    default_rviz_config_path = os.path.join(package_dir, "rviz", "urdf_config.rviz")
+    robot_localization_file_path = os.path.join(package_dir, "config", "ekf.yaml")
      # Launch configuration variables specific to simulation
     gui = LaunchConfiguration('gui')
     model = LaunchConfiguration('model')
@@ -79,7 +80,14 @@ def generate_launch_description():
         parameters=[{'use_sim_time': use_sim_time, 
         'robot_description': Command(['xacro ', model])}],
         arguments=[default_model_path])
-
+    # Start robot localization using an Extended Kalman filter
+    start_robot_localization_cmd = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[robot_localization_file_path, 
+        {'use_sim_time': use_sim_time}])
     # Launch RViz
     start_rviz_cmd = Node(
         condition=IfCondition(use_rviz),
@@ -117,6 +125,7 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_cmd)
 
     # Add any actions
+    ld.add_action(start_robot_localization_cmd)
     ld.add_action(start_joint_state_publisher_cmd)
     ld.add_action(start_joint_state_publisher_gui_node)
     ld.add_action(start_robot_state_publisher_cmd)
