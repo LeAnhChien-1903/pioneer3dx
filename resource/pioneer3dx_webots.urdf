@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<robot name="pioneer3dx">
+    <webots>
+        <plugin type="pioneer3dx.slam_control.SLAMController" />
+    </webots>
+
+</robot>
