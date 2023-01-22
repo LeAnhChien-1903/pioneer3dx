@@ -14,8 +14,8 @@ WorldInfo {
   basicTimeStep 16
 }
 Viewpoint {
-  orientation 0.26443151265688014 0.14144936363319 -0.9539748700263334 2.1978763056211568
-  position 1.418099443239472 2.308624511412839 1.603944058894152
+  orientation 0.36997627254662335 0.3742889591839257 -0.8503089631337073 1.7207892601753867
+  position 0.45961137012672904 11.181885736800288 12.312376967553135
   follow "pioneer3dx"
 }
 TexturedBackground {
@@ -1216,7 +1216,7 @@ Robot {
     Group {
       children [
         HokuyoUrg04lx {
-          translation 0.1 0 0.19
+          translation 0 0 0.19
           name "lidar"
         }
         InertialUnit {
