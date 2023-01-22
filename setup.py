@@ -24,7 +24,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'slam_control = pioneer3dx.slam_control:main'
+            'slam_control = pioneer3dx.slam_control:main',
+            'mapping_robot = pioneer3dx.mapping:main'
         ],
     },
 )

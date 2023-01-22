@@ -88,13 +88,13 @@ class SLAMController():
     def getLidarLaserScan(self):
         self.__laserScan.header.stamp = self.__node.get_clock().now().to_msg()
         self.__laserScan.header.frame_id = 'lidar'
-        self.__laserScan.angle_min = 2.0943949222564697
-        self.__laserScan.angle_max = -2.0943949222564697
-        self.__laserScan.angle_increment = -0.006289474666118622
+        self.__laserScan.angle_min = 2*np.pi/3
+        self.__laserScan.angle_max = -2*np.pi/3
+        self.__laserScan.angle_increment = -4*np.pi/(3*667)
         self.__laserScan.time_increment = 0.0
         self.__laserScan.scan_time = 0.0
-        self.__laserScan.range_min = 0.05999999865889549
-        self.__laserScan.range_max = 4.0960001945495605
+        self.__laserScan.range_min = 0.06
+        self.__laserScan.range_max = 4.095
         self.__laserScan.ranges = self.__lidar.getRangeImage()
         self.__laserScanPub.publish(self.__laserScan)
     def getLidarPointCloud(self):
@@ -162,7 +162,7 @@ class SLAMController():
         self.__rightMotor.setVelocity(rightVelocity)
         self.getImuData()
         self.getLidarLaserScan()
-        # self.odometry()
+        self.odometry()
         
     @staticmethod
     def quaternion_from_euler(ai, aj, ak):
