@@ -27,7 +27,6 @@ class GMapping(Node):
         self.create_timer(0.016, self.timerCallback)
         
     def timerCallback(self):
-        print('Start mapping')
         distances, angles, information = self.convertLaserScan()
         x_odom, y_odom, theta_odom = self.get_odom_pose()
         distances_x, distances_y = self.lidar_scan_xy(distances, angles, x_odom, y_odom, theta_odom)
